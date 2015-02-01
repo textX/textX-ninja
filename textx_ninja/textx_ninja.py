@@ -70,6 +70,12 @@ class TextXProjectType(IProjectTypeHandler):
 
         wizard._load_project(path)
 
+    def get_context_menus(self):
+        """"
+        Returns a iterable of QMenu
+        """
+        return()
+
 
 class TextXNinja(plugin.Plugin):
     def initialize(self):
