@@ -32,9 +32,9 @@ TEXTX_SYNTAX = \
   "definition": [
   ],
   "regex": [
-     ["^[a-zA-Z0-9_]*:", "properObject", "bold"],
-     ["[a-zA-Z0-9_]*(?=(\+=|\*=|=))", "extras"]
-#    ["\#[A-Z0-9-]*", "properObject", "bold"],
+     ["^[a-zA-Z0-9_]*(?=(:))", "properObject", "bold"],
+     ["[a-zA-Z0-9_]+[ ]?(?=(\+=|\*=|\?=|=))", "properObject", ],
+     ["\/(.*)\/", "extras"]
   ],
   "extras": [
       "ID",
@@ -42,7 +42,9 @@ TEXTX_SYNTAX = \
       "BOOL",
       "FLOAT",
       "STRING",
-      "BASETYPE"
+      "BASETYPE",
+      "skipws",
+      "noskipws"
   ]
 
 }

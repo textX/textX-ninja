@@ -15,7 +15,6 @@ PROJECT_TYPE = "textX Project"
 SUPPORTED_EXTENSIONS = [".py",
                         ".jpg",
                         ".png",
-                        ".py",
                         ".rst",
                         ".tx",
                         ".dot"]
