@@ -9,6 +9,7 @@ from ninja_ide.core import file_manager
 from ninja_ide.tools import json_manager
 
 from .textxsyntax import TEXTX_EXTENSION, TEXTX_SYNTAX
+from .graph_widget import TextXGraphWidget
 
 
 PROJECT_TYPE = "textX Project"
@@ -18,6 +19,8 @@ SUPPORTED_EXTENSIONS = [".py",
                         ".rst",
                         ".tx",
                         ".dot"]
+
+PRJ_PATH = os.path.abspath(os.path.dirname(__file__)).decode('utf-8')
 
 
 class TextXProjectType(IProjectTypeHandler):
@@ -81,6 +84,7 @@ class TextXNinja(plugin.Plugin):
         # Init your plugin
         self.editor_s = self.locator.get_service('editor')
         self.explorer_s = self.locator.get_service('explorer')
+        self.misc_s = self.locator.get_service('misc')
 
         # Set a project handler for NINJA-IDE Plugin
         self.explorer_s.set_project_type_handler(PROJECT_TYPE,
@@ -90,6 +94,13 @@ class TextXNinja(plugin.Plugin):
         # for Natural code.
         #self.editor_s.fileOpened.connect(
             #get_change_sidebar_slot(self.editor_s))
+
+        #Graph widget in misc container
+        my_widget = TextXGraphWidget()
+        icon_path = os.path.join(PRJ_PATH, "img", "graph.png")
+        description = "TextX meta-model visualization widget."
+
+        self.misc_s.add_widget(my_widget, icon_path, description)
 
         # Natural syntax support
         settings.EXTENSIONS[TEXTX_EXTENSION] = 'textx'
