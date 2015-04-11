@@ -11,6 +11,9 @@ from ninja_ide.tools import json_manager
 from .textxsyntax import TEXTX_EXTENSION, TEXTX_SYNTAX
 from .graph_widget import TextXGraphWidget
 
+from textx.metamodel import metamodel_from_file
+from textx.export import metamodel_export
+
 
 PROJECT_TYPE = "textX Project"
 SUPPORTED_EXTENSIONS = [".py",
@@ -20,6 +23,7 @@ SUPPORTED_EXTENSIONS = [".py",
                         ".tx",
                         ".dot"]
 
+#Project path
 PRJ_PATH = os.path.abspath(os.path.dirname(__file__)).decode('utf-8')
 
 
@@ -105,6 +109,16 @@ class TextXNinja(plugin.Plugin):
         # Natural syntax support
         settings.EXTENSIONS[TEXTX_EXTENSION] = 'textx'
         settings.SYNTAX['textx'] = TEXTX_SYNTAX
+
+        #Signals
+        self.editor_s.beforeFileSaved.connect(self._export_model)
+
+    def _export_model(self, fileName):
+        # Get meta-model from language description
+        model = metamodel_from_file(fileName)
+        print(model)
+        # Optionally export model to dot
+        metamodel_export(model, 'example.dot')
 
     def finish(self):
         # Shutdown your plugin

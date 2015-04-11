@@ -1,7 +1,30 @@
 {
-  "venv": "", 
-  "project-type": "NINJA-Plugin-Project", 
+  "mainFile": "", 
+  "use-tabs": false, 
+  "venv": "C:\\Users\\Masa\\.virtualenvs\\ninjaide\\Scripts\\python.exe", 
+  "relatedProjects": [], 
   "name": "textX-ninja", 
   "license": "GNU General Public License v3", 
+  "url": "", 
+  "pythonPath": "C:/Python27/pythonw.exe", 
+  "preExecScript": "", 
+  "additional_builtins": [], 
+  "programParams": "", 
+  "indentation": 4, 
+  "PYTHONPATH": "", 
+  "supported-extensions": [
+    ".py", 
+    ".html", 
+    ".jpg", 
+    ".png", 
+    ".ui", 
+    ".css", 
+    ".json", 
+    ".js", 
+    ".ini", 
+    ".dot"
+  ], 
+  "project-type": "NINJA-Plugin-Project", 
+  "postExecScript": "", 
   "description": ""
 }
