@@ -11,6 +11,7 @@ from PyQt4.QtGui import QPixmap
 from PyQt4.QtGui import QPainter
 from PyQt4.QtGui import QBrush
 from PyQt4.QtGui import QColor
+from PyQt4.QtGui import QGraphicsPixmapItem
 from ninja_ide.gui.main_panel import main_container
 from ninja_ide.gui.explorer import explorer_container
 import sys
@@ -74,12 +75,23 @@ class GraphicsView(QGraphicsView):
         else:
             super(QGraphicsView, self).wheelEvent(event)
 
+    def mouseDoubleClickEvent(self, event):
+        """
+        On doble click event on graph make that position center of graph
+        """
+        # get coordinates for centering from position of event
+        mousePoint = self.mapToScene(event.pos())
+        self.centerOn(mousePoint)
+
 
 class GraphicsScene(QGraphicsScene):
 
     def __init__(self, parent):
         super(GraphicsScene, self).__init__(parent)
         self.setBackgroundBrush(QBrush(QColor(0, 0, 0, 0)))
-        self.addPixmap(
-            QPixmap(os.path.join(PRJ_PATH, "img", "test.png")))
+        self.image = QPixmap(os.path.join(PRJ_PATH, "img", "test.png"))
+        self.item = self.addPixmap(self.image)
+
+
+
 
