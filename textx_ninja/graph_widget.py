@@ -39,7 +39,8 @@ class TextXGraphWidget(QWidget):
         self._graph.setScene(self.scene)
         self._graph.setDragMode(QGraphicsView.ScrollHandDrag)
         self._graph.setRenderHints(QPainter.Antialiasing)
-        #self._graph.fitInView()
+        self._graph.fitInView(self.scene.item, Qt.KeepAspectRatio)
+        self._graph.setBackgroundBrush(QBrush(QColor(123, 123, 123, 0)))
 
         #Main Layout
         main_hbox = QHBoxLayout(self)
@@ -48,6 +49,8 @@ class TextXGraphWidget(QWidget):
 
         #Graph Layout
         vboxGph = QVBoxLayout()
+        vboxGph.setContentsMargins(0, 0, 0, 0)
+        vboxGph.setSpacing(0)
         vboxGph.addWidget(self._graph)
 
         main_hbox.addLayout(vboxGph)
