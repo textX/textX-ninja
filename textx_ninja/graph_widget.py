@@ -4,14 +4,17 @@ import os
 from PyQt4.QtCore import Qt
 from PyQt4.QtGui import QWidget
 from PyQt4.QtGui import QGraphicsView
+from PyQt4.QtGui import QGraphicsItem
 from PyQt4.QtGui import QVBoxLayout
-from PyQt4.QtGui import QHBoxLayout
 from PyQt4.QtGui import QGraphicsScene
-from PyQt4.QtGui import QPixmap
 from PyQt4.QtGui import QPainter
 from PyQt4.QtGui import QBrush
 from PyQt4.QtGui import QColor
-from PyQt4.QtGui import QGraphicsPixmapItem
+from PyQt4.QtGui import QLabel
+from PyQt4.QtCore import QSize
+from PyQt4.QtWebKit import QGraphicsWebView
+from PyQt4.QtCore import QUrl
+from PyQt4.QtGui import QSizePolicy
 from ninja_ide.gui.main_panel import main_container
 from ninja_ide.gui.explorer import explorer_container
 import sys
@@ -36,30 +39,86 @@ class TextXGraphWidget(QWidget):
 
         # Graph scene
         self.scene = GraphicsScene(self._graph)
+
+        path = os.path.join(PRJ_PATH, "img", 'textX-ninja.svg')
+        self.scene.webview = QGraphicsWebView()
+        self.create_webview(path)
+
+        self.scene.addItem(self.scene.webview)
+
         self._graph.setScene(self.scene)
         self._graph.setDragMode(QGraphicsView.ScrollHandDrag)
-        self._graph.setRenderHints(QPainter.Antialiasing)
-        self._graph.fitInView(self.scene.item, Qt.KeepAspectRatio)
-        self._graph.setBackgroundBrush(QBrush(QColor(123, 123, 123, 0)))
+        self._graph.setRenderHints(QPainter.SmoothPixmapTransform)
+
+        self._graph.setBackgroundBrush(QBrush(QColor(255, 255, 255, 255)))
+
+        self.label = QLabel(self)
+        self.label.setStyleSheet(
+            "QLabel { color : black; background-color: white;}")
 
         #Main Layout
-        main_hbox = QHBoxLayout(self)
+        main_hbox = QVBoxLayout(self)
         main_hbox.setContentsMargins(0, 0, 0, 0)
         main_hbox.setSpacing(0)
+        main_hbox.addWidget(self.label)
+        main_hbox.addWidget(self._graph)
 
-        #Graph Layout
-        vboxGph = QVBoxLayout()
-        vboxGph.setContentsMargins(0, 0, 0, 0)
-        vboxGph.setSpacing(0)
-        vboxGph.addWidget(self._graph)
+    def create_webview(self, path):
+        self.scene.webview.load(QUrl(path))
+        self.scene.webview.setFlags(QGraphicsItem.ItemClipsToShape)
+        self.scene.webview.setCacheMode(QGraphicsItem.NoCache)
+        self.scene.webview.setZValue(0)
 
-        main_hbox.addLayout(vboxGph)
+        self.w = self._graph.size().width()
+        self.h = self._graph.size().height()
+
+        self.scene.webview.setSizePolicy(QSizePolicy.Expanding,
+            QSizePolicy.Expanding)
+        self.scene.webview.page().setPreferredContentsSize(QSize(
+            self._graph.size().width(), self._graph.size().height()))
+        self.scene.webview.setResizesToContents(True)
+
+        frame = self.scene.webview.page().mainFrame()
+        frame.setScrollBarPolicy(Qt.Horizontal, Qt.ScrollBarAlwaysOff)
+        frame.setScrollBarPolicy(Qt.Vertical, Qt.ScrollBarAlwaysOff)
+
+    def load_meta_model(self, path, name):
+        self.scene.clear()
+
+        self.scene = GraphicsScene(self._graph)
+
+        self.scene.webview = QGraphicsWebView()
+        self.create_webview(path)
+
+        self.scene.addItem(self.scene.webview)
+
+        self.add_label(name)
+
+        self._graph.setScene(self.scene)
+
+        self._graph.fitInView(
+            self.scene.itemsBoundingRect(), Qt.KeepAspectRatio)
+
+    def update_error_lbl(self, fileName):
+        self.add_label(fileName, True)
+
+    def add_label(self, fileName, isError=False):
+        err = 'There is an error in '  # mozda kao konstanta
+        if isError:
+            txtLbl = err + fileName[fileName.rfind('/') + 1:fileName.rfind('.')]
+        else:
+            txtLbl = fileName[fileName.rfind('/') +
+                1:fileName.rfind('.')].capitalize()
+
+        self.label.setText(txtLbl)
+        self.label.repaint()
 
 
 class GraphicsView(QGraphicsView):
 
     def __init__(self):
         super(GraphicsView, self).__init__()
+        self.label = QLabel(self)
 
     def wheelEvent(self, event):
         # zoom when control key is pressed otherwise move scrollbars
@@ -91,10 +150,10 @@ class GraphicsScene(QGraphicsScene):
 
     def __init__(self, parent):
         super(GraphicsScene, self).__init__(parent)
-        self.setBackgroundBrush(QBrush(QColor(0, 0, 0, 0)))
-        self.image = QPixmap(os.path.join(PRJ_PATH, "img", "test.png"))
-        self.item = self.addPixmap(self.image)
 
+    def mousePressEvent(self, event):
+        self.parent.setDragMode(1)
+        self.startPos = event.scenePos()
 
-
-
+    def mouseReleaseEvent(self, event):
+        self.parent.setDragMode(0)
