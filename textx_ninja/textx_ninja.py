@@ -25,10 +25,12 @@ SUPPORTED_EXTENSIONS = [".py",
                         ".tx",
                         ".dot"]
 
-TMP_METAMODEL = "tmp_metamodel.tx"
-TMP_MODEL = "tmp_model.ml"
-METAMODEL = "metamodel.svg"
-MODEL = "model.svg"
+#Names for files
+METAMODEL_SVG = "metamodel.svg"
+MODEL_SVG = "model.svg"
+
+METAMODEL = "metamodel"
+MODEL = "model"
 
 #Project path
 PRJ_PATH = os.path.abspath(os.path.dirname(__file__)).decode('utf-8')
@@ -126,57 +128,80 @@ class TextXNinja(plugin.Plugin):
         self.editor_s.editorKeyPressEvent.connect(self.file_changed)
 
     def file_changed(self):
+        '''
+        Handles key pressed event
+        '''
         filename = self.editor_s.get_editor_path()
-        filePath, fileExtension = os.path.splitext(filename)
-        text = self.editor_s.get_text()
-        if fileExtension == '.tx':
-            newFileName = TMP_METAMODEL
-        else:
-            newFileName = TMP_MODEL
-        f = open(os.path.join(PRJ_PATH, newFileName), 'w')
-        f.write(text)
-        f.flush()
-        f.close()
-        self._export_model(os.path.join(PRJ_PATH, newFileName))
+        fileType = self.get_file_type(filename)
+
+        if not fileType == "py":
+            text = self.editor_s.get_text()
+            if text == "":
+                if fileType == METAMODEL:
+                    self.my_widget.add_label("Metamodel", 0)
+                elif fileType == MODEL:
+                    self.my_widget.add_label("Model", 1)
+            else:
+                name = file_manager.get_module_name(filename)
+                if fileType == METAMODEL:
+                    newFileName = name + ".tx"
+                elif fileType == MODEL:
+                    newFileName = name + ".ml"
+
+                tmp_folder = os.path.join(PRJ_PATH, "temp")
+                if not file_manager.folder_exists(tmp_folder):
+                    file_manager.create_folder(tmp_folder)
+                f = open(os.path.join(tmp_folder, newFileName), 'w')
+                f.write(text)
+                f.flush()
+                f.close()
+                self._export_model(os.path.join(tmp_folder, newFileName))
 
     def _export_model(self, fileName):
-        filePath, fileExtension = os.path.splitext(fileName)
-        if fileExtension == '.tx':
+        fileType = self.get_file_type(fileName)
+        if fileType == METAMODEL:
             # Get meta-model from language description
             try:
                 self.meta_model = metamodel_from_file(fileName)
                 # Optionally export model to dot
                 path = os.path.join(PRJ_PATH, "meta.dot")
-
                 metamodel_export(self.meta_model, path)
-
-                svg_path = os.path.join(PRJ_PATH, "img", METAMODEL)
-                self.create_load_svg(path, svg_path)
+                svg_path = os.path.join(PRJ_PATH, "img", METAMODEL_SVG)
+                self.create_load_svg(path, svg_path,
+                    file_manager.get_module_name(fileName), 0)
             except:
-                self.my_widget.update_error_lbl(fileName)
-
-        elif not fileExtension == '.py':
+                self.my_widget.update_error_lbl(file_manager.get_module_name(
+                    fileName), 0)
+        elif fileType == MODEL:
             try:
                 self.model = self.meta_model.model_from_file(fileName)
                 path = os.path.join(PRJ_PATH, "model.dot")
                 model_export(self.model, path)
-                svg_path = os.path.join(PRJ_PATH, "img", MODEL)
-                self.create_load_svg(path, svg_path)
+                svg_path = os.path.join(PRJ_PATH, "img", MODEL_SVG)
+                self.create_load_svg(path, svg_path,
+                    file_manager.get_module_name(fileName), 1)
             except:
-                self.my_widget.update_error_lbl(fileName)
+                self.my_widget.update_error_lbl(file_manager.get_module_name(
+                    fileName), 1)
 
-    def create_load_svg(self, path, svg_path):
+    def create_load_svg(self, path, svg_path, name, tabIndex):
         f = pydot.graph_from_dot_file(path)
         f.write_svg(svg_path)
 
-        self.my_widget.load_meta_model(svg_path, svg_path)
+        self.my_widget.load_graph(svg_path, name, tabIndex)
         os.remove(path)
+
+    def get_file_type(self, fileName):
+        fileExtension = file_manager.get_file_extension(fileName)
+        if fileExtension == "tx":
+            return METAMODEL
+        elif not fileExtension == "py":
+            return MODEL
+        return "py"
 
     def finish(self):
         # Shutdown your plugin
-        os.remove(os.path.join(PRJ_PATH, TMP_METAMODEL))
-        os.remove(os.path.join(PRJ_PATH, TMP_MODEL))
-        os.remove(os.path.join(PRJ_PATH, "img", MODEL))
+        file_manager.delete_folder(os.path.join(PRJ_PATH, "temp"))
 
     def get_preferences_widget(self):
         # Return a widget for customize your plugin
