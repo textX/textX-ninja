@@ -111,20 +111,20 @@ class TextXNinja(plugin.Plugin):
                 TextXProjectType(self.locator))
 
         #Graph widget in misc container
-        self.my_widget = TextXGraphWidget()
+        self.graph_widget = TextXGraphWidget()
         icon_path = os.path.join(PRJ_PATH, "img", "graph.png")
         description = "TextX meta-model visualization widget."
 
-        self.misc_s.add_widget(self.my_widget, icon_path, description)
+        self.misc_s.add_widget(self.graph_widget, icon_path, description)
 
         # Natural syntax support
         settings.EXTENSIONS[TEXTX_EXTENSION] = 'textx'
         settings.SYNTAX['textx'] = TEXTX_SYNTAX
 
         #Signals
-        self.editor_s.fileSaved.connect(self._export_model)
-        self.editor_s.fileOpened.connect(self._export_model)
-        self.editor_s.currentTabChanged.connect(self._export_model)
+        self.editor_s.fileSaved.connect(self._visualize)
+        self.editor_s.fileOpened.connect(self._visualize)
+        self.editor_s.currentTabChanged.connect(self._visualize)
         self.editor_s.editorKeyPressEvent.connect(self.file_changed)
 
     def file_changed(self):
@@ -138,9 +138,9 @@ class TextXNinja(plugin.Plugin):
             text = self.editor_s.get_text()
             if text == "":
                 if fileType == METAMODEL:
-                    self.my_widget.add_label("Metamodel", 0)
+                    self.graph_widget.add_label("Metamodel", 0)
                 elif fileType == MODEL:
-                    self.my_widget.add_label("Model", 1)
+                    self.graph_widget.add_label("Model", 1)
             else:
                 name = file_manager.get_module_name(filename)
                 if fileType == METAMODEL:
@@ -155,9 +155,9 @@ class TextXNinja(plugin.Plugin):
                 f.write(text)
                 f.flush()
                 f.close()
-                self._export_model(os.path.join(tmp_folder, newFileName))
+                self._visualize(os.path.join(tmp_folder, newFileName))
 
-    def _export_model(self, fileName):
+    def _visualize(self, fileName):
         fileType = self.get_file_type(fileName)
         if fileType == METAMODEL:
             # Get meta-model from language description
@@ -170,7 +170,7 @@ class TextXNinja(plugin.Plugin):
                 self.create_load_svg(path, svg_path,
                     file_manager.get_module_name(fileName), 0)
             except:
-                self.my_widget.update_error_lbl(file_manager.get_module_name(
+                self.graph_widget.update_error_lbl(file_manager.get_module_name(
                     fileName), 0)
         elif fileType == MODEL:
             try:
@@ -181,14 +181,14 @@ class TextXNinja(plugin.Plugin):
                 self.create_load_svg(path, svg_path,
                     file_manager.get_module_name(fileName), 1)
             except:
-                self.my_widget.update_error_lbl(file_manager.get_module_name(
+                self.graph_widget.update_error_lbl(file_manager.get_module_name(
                     fileName), 1)
 
     def create_load_svg(self, path, svg_path, name, tabIndex):
         f = pydot.graph_from_dot_file(path)
         f.write_svg(svg_path)
 
-        self.my_widget.load_graph(svg_path, name, tabIndex)
+        self.graph_widget.load_graph(svg_path, name, tabIndex)
         os.remove(path)
 
     def get_file_type(self, fileName):

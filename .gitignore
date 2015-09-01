@@ -52,3 +52,6 @@ docs/_build/
 
 # PyBuilder
 target/
+#temp files
+textx_ninja/img/metamodel.svg
+textx_ninja/img/model.svg
