@@ -30,3 +30,8 @@ There can be multiple models in one project, but only one at the time is going t
 ![alt tag](https://raw.githubusercontent.com/masatalovic/textX-ninja/master/art/model_svg.png)
 
 
+## **Authors**
+
+- [Maša Talović] (https://github.com/masatalovic/)
+
+This tool is being developed by master students under the menthorship of [Igor Dejanović] (https://github.com/igordejanovic)
