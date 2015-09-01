@@ -21,8 +21,10 @@ TEXTX_SYNTAX = \
   "operators": [
     "\|",
     "\*",
+    "\+",
     "\?",
     "=",
+    "\?=",
     "\+=",
     "\*="
   ],
@@ -44,7 +46,9 @@ TEXTX_SYNTAX = \
       "STRING",
       "BASETYPE",
       "skipws",
-      "noskipws"
+      "noskipws",
+      "ws",
+      "eolterm"
   ]
 
 }
