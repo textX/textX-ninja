@@ -163,26 +163,28 @@ class TextXNinja(plugin.Plugin):
             # Get meta-model from language description
             try:
                 self.meta_model = metamodel_from_file(fileName)
-                # Optionally export model to dot
-                path = os.path.join(PRJ_PATH, "meta.dot")
-                metamodel_export(self.meta_model, path)
-                svg_path = os.path.join(PRJ_PATH, "img", METAMODEL_SVG)
-                self.create_load_svg(path, svg_path,
-                    file_manager.get_module_name(fileName), 0)
+                if not self.graph_widget.isHidden():
+                    # Export model to dot
+                    path = os.path.join(PRJ_PATH, "meta.dot")
+                    metamodel_export(self.meta_model, path)
+                    svg_path = os.path.join(PRJ_PATH, "img", METAMODEL_SVG)
+                    self.create_load_svg(path, svg_path,
+                        file_manager.get_module_name(fileName), 0)
             except:
                 self.graph_widget.update_error_lbl(file_manager.get_module_name(
                     fileName), 0)
         elif fileType == MODEL:
-            try:
-                self.model = self.meta_model.model_from_file(fileName)
-                path = os.path.join(PRJ_PATH, "model.dot")
-                model_export(self.model, path)
-                svg_path = os.path.join(PRJ_PATH, "img", MODEL_SVG)
-                self.create_load_svg(path, svg_path,
-                    file_manager.get_module_name(fileName), 1)
-            except:
-                self.graph_widget.update_error_lbl(file_manager.get_module_name(
-                    fileName), 1)
+            if not self.graph_widget.isHidden():
+                try:
+                    self.model = self.meta_model.model_from_file(fileName)
+                    path = os.path.join(PRJ_PATH, "model.dot")
+                    model_export(self.model, path)
+                    svg_path = os.path.join(PRJ_PATH, "img", MODEL_SVG)
+                    self.create_load_svg(path, svg_path,
+                        file_manager.get_module_name(fileName), 1)
+                except:
+                    self.graph_widget.update_error_lbl(
+                        file_manager.get_module_name(fileName), 1)
 
     def create_load_svg(self, path, svg_path, name, tabIndex):
         f = pydot.graph_from_dot_file(path)
