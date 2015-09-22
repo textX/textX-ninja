@@ -14,6 +14,9 @@ from .graph_widget import TextXGraphWidget
 from textx.metamodel import metamodel_from_file
 from textx.export import metamodel_export
 from textx.export import model_export
+from textx.exceptions import TextXError
+
+from ninja_ide.gui.main_panel import main_container
 
 import pydot
 
@@ -170,9 +173,8 @@ class TextXNinja(plugin.Plugin):
                     svg_path = os.path.join(PRJ_PATH, "img", METAMODEL_SVG)
                     self.create_load_svg(path, svg_path,
                         file_manager.get_module_name(fileName), 0)
-            except:
-                self.graph_widget.update_error_lbl(file_manager.get_module_name(
-                    fileName), 0)
+            except TextXError as error:
+                self.handle_exception(fileName, 0, error.line)
         elif fileType == MODEL:
             if not self.graph_widget.isHidden():
                 try:
@@ -182,9 +184,8 @@ class TextXNinja(plugin.Plugin):
                     svg_path = os.path.join(PRJ_PATH, "img", MODEL_SVG)
                     self.create_load_svg(path, svg_path,
                         file_manager.get_module_name(fileName), 1)
-                except:
-                    self.graph_widget.update_error_lbl(
-                        file_manager.get_module_name(fileName), 1)
+                except TextXError as error:
+                    self.handle_exception(fileName, 1, error.line)
 
     def create_load_svg(self, path, svg_path, name, tabIndex):
         f = pydot.graph_from_dot_file(path)
@@ -200,6 +201,12 @@ class TextXNinja(plugin.Plugin):
         elif not fileExtension == "py":
             return MODEL
         return "py"
+
+    def handle_exception(self, fileName, tabindex, lineno):
+        self.graph_widget.update_error_lbl(file_manager.get_module_name(
+                    fileName), tabindex)
+        main = main_container.MainContainer()
+        main.editor_jump_to_line(lineno=int(lineno) - 1)
 
     def finish(self):
         # Shutdown your plugin
